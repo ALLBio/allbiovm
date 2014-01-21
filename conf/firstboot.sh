@@ -18,20 +18,41 @@ mkdir -p ${CHROOT}/input
 
 
 
+# Fix the git:// protocol to https:// (we are working behind firewall, git connection is not possible)
+echo "Changing git config" 2>&1 >> ${SOFTWARE_DIR}/install.log
+#git config --global url.https://github.com/.insteadOf git://github.com/ 2>&1 >> ${SOFTWARE_DIR}/install.log
+(
+cat <<'EOF'
+[url "https://github.com/"]
+	insteadOf = git://github.com/
+EOF
+) > /etc/gitconfig
+git config --global -l 2>&1 >> ${SOFTWARE_DIR}/install.log
+
+
 
 # get some software from github (of which don't have distributions in apt')
 cd ${SOFTWARE_DIR}
 
+# Boost C++ library
 wget http://downloads.sourceforge.net/project/boost/boost/1.55.0/boost_1_55_0.tar.gz
 tar -zxf boost_1_55_0.tar.gz
 cd boost_1_55_0
 sh bootstrap.sh
 cd ${SOFTWARE_DIR}
 
+# BWA
+git clone https://github.com/lh3/bwa.git
+cd bwa
+git checkout tags/0.7.5a
+make 
+cd ${SOFTWARE_DIR}
+
+
 # HTSlib for samtools (latest version >=0.2.0)
 git clone https://github.com/samtools/htslib.git
-make -C htslib -f Makefile
-make -C htslib -f Makefile install
+make -C htslib -f Makefile 2>&1 >> ${SOFTWARE_DIR}/install.log
+make -C htslib -f Makefile install 2>&1 >> ${SOFTWARE_DIR}/install.log
 cd ${SOFTWARE_DIR}
 
 # Bamtools
@@ -39,7 +60,7 @@ git clone https://github.com/pezmaster31/bamtools.git
 cd bamtools
 mkdir build
 cd build
-cmake ..
+cmake .. 2>&1 >> ${SOFTWARE_DIR}/install.log
 make
 cd ${SOFTWARE_DIR}
 
@@ -48,42 +69,90 @@ git clone https://github.com/samtools/samtools.git
 cd samtools
 git checkout tags/0.1.19
 cd ${SOFTWARE_DIR}
-make -C samtools -f Makefile
+make -C samtools -f Makefile 2>&1 >> ${SOFTWARE_DIR}/install.log
 cd ${SOFTWARE_DIR}
+
+# Sickle trimming tool
+mkdir -p sickle
+cd sickle
+git clone https://github.com/najoshi/sickle.git sickle-v1.2.1
+cd sickle-v1.2.1
+make 2>&1 >> ${SOFTWARE_DIR}/install.log
+cd ${SOFTWARE_DIR}
+
 
 # Pindel
 #git clone https://github.com/genome/pindel.git
 #make -C pindel -f Makefile SAMTOOLS=`pwd`/samtools
+mkdir pindel
+cd pindel
 wget -O pindel.tar.gz https://github.com/genome/pindel/archive/v0.2.5.tar.gz
 tar -xzf pindel.tar.gz
-mv pindel-0.2.5 pindel
-cd pindel
-/bin/bash INSTALL `pwd`/samtools
+cd pindel-0.2.5
+/bin/sh INSTALL ${SOFTWARE_DIR}/samtools 2>&1 >> ${SOFTWARE_DIR}/install.log
 cd ${SOFTWARE_DIR}
 
 # Clever-sv
+mkdir clever
+cd clever
 git clone https://code.google.com/p/clever-sv/
 cd clever-sv
-cmake -DCMAKE_INSTALL_PREFIX=`pwd` .
-make
-make install
+cmake -DCMAKE_INSTALL_PREFIX=`pwd` . 2>&1 >> ${SOFTWARE_DIR}/install.log
+make 2>&1 >> ${SOFTWARE_DIR}/install.log
+make install 2>&1 >> ${SOFTWARE_DIR}/install.log
 cd ${SOFTWARE_DIR}
 
 # New version of Delly
 #git clone https://github.com/tobiasrausch/delly.git
 #make -C delly -f Makefile BOOST=${SOFTWARE_DIR}/boost BAMTOOLS=${SOFTWARE_DIR}/bamtools KSEQ=
 mkdir delly
-#wget -O delly/delly_v0.2.2_parallel_linux_x86_64bit https://github.com/tobiasrausch/delly/releases/download/v0.2.2/delly_v0.2.2_parallel_linux_x86_64bit
-wget -O delly/delly_v0.2.2_linux_x86_64bit https://github.com/tobiasrausch/delly/releases/download/v0.2.2/delly_v0.2.2_linux_x86_64bit
-chmod +x delly/*
+cd delly
+mkdir delly-v0.2.2
+wget -O delly-v0.2.2/delly_v0.2.2_parallel_linux_x86_64bit https://github.com/tobiasrausch/delly/releases/download/v0.2.2/delly_v0.2.2_parallel_linux_x86_64bit
+wget -O delly-v0.2.2/delly_v0.2.2_linux_x86_64bit https://github.com/tobiasrausch/delly/releases/download/v0.2.2/delly_v0.2.2_linux_x86_64bit
+chmod -R +x *
+cd ${SOFTWARE_DIR}
+
+# New version of Breakdancer
+mkdir breakdancer
+cd breakdancer
+git clone --recursive https://github.com/genome/breakdancer.git breakdancer-v1.4.4
+cd breakdancer-v1.4.4
+git checkout tags/v1.4.4
+mkdir -p build
+mkdir -p bin
+cd build
+export SAMTOOLS_ROOT=${SOFTWARE_DIR}/samtools
+cmake .. -DCMAKE_BUILD_TYPE=release -DCMAKE_INSTALL_PREFIX=..  2>&1 >> ${SOFTWARE_DIR}/install.log
+make  2>&1 >> ${SOFTWARE_DIR}/install.log
+make install  2>&1 >> ${SOFTWARE_DIR}/install.log
 cd ${SOFTWARE_DIR}
 
 
+# Install PRISM
+mkdir prism
+wget -O prism/PRISM_1_1_6.linux.x86_64.tar.gz http://compbio.cs.toronto.edu/prism/releases/PRISM_1_1_6.linux.x86_64.tar.gz
+cd prism
+tar -zxf PRISM_1_1_6.linux.x86_64.tar.gz
+echo "export PRISM_PATH=`pwd`/PRISM_1_1_6" > /etc/profile.d/prism.sh
+cd ${SOFTWARE_DIR}
 
+# Install SVDetect
+mkdir svdetect
+cd svdetect
+wget http://downloads.sourceforge.net/project/svdetect/SVDetect/0.80/SVDetect_r0.8b.tar.gz
+tar -xzf *.tar.gz
+cd ${SOFTWARE_DIR}
 
-
-
-
+# Install GASV
+mkdir gasv
+cd gasv
+wget https://gasv.googlecode.com/files/GASVRelease_Oct1_2013.tgz
+tar -zxf *.tgz
+mv gasv GASVRelease_Oct1_2013
+cd GASVRelease_Oct1_2013
+/bin/bash install >> ${SOFTWARE_DIR}/install.log
+cd ${SOFTWARE_DIR}
 
 
 

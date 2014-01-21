@@ -51,8 +51,9 @@ fi
 mkdir -p original-iso custom-iso
 sudo mount -o loop $INPUT_ISO ./original-iso
 
-sudo cp -r ./original-iso/* ./custom-iso/
-sudo cp -r ./original-iso/.disk/ ./custom-iso/
+sudo rsync -ax ./original-iso/ ./custom-iso
+#sudo cp -r ./original-iso/* ./custom-iso/
+#sudo cp -r ./original-iso/.disk/ ./custom-iso/
 
 sudo umount ./original-iso/
 

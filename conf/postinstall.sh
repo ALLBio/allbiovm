@@ -8,8 +8,12 @@ dialog --title "Postinstall" --infobox "Installing tools specific for this node.
 
 apt-get update
 apt-get -y install \
+    ant \
+    openjdk-6-jdk \
+    openjdk-7-jdk \
     build-essential \
     byobu \
+    htop \
     cmake \
     git-core \
     libboost-all-dev \
@@ -26,6 +30,7 @@ apt-get -y install \
     python-pip \
     rsync \
     sshfs \
+    tree \
     vim \
     vnstat \
     texlive-latex-base \
