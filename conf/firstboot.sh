@@ -42,11 +42,25 @@ sh bootstrap.sh
 cd ${SOFTWARE_DIR}
 
 # BWA
-git clone https://github.com/lh3/bwa.git
+mkdir bwa
 cd bwa
+git clone https://github.com/lh3/bwa.git bwa-v0.7.5a
+cd bwa-v0.7.5a
 git checkout tags/0.7.5a
 make 
+ln -s `pwd`/bwa /usr/local/bin/bwa
 cd ${SOFTWARE_DIR}
+
+# FastQC
+mkdir FastQC
+cd FastQC
+wget -O fastqc_v0.10.1.zip http://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.10.1.zip
+unzip *.zip
+mv FastQC fastqc_v0.10.1
+cd fastqc_v0.10.1
+chmod 777 fastqc
+cd ${SOFTWARE_DIR}
+
 
 
 # HTSlib for samtools (latest version >=0.2.0)
@@ -65,11 +79,13 @@ make
 cd ${SOFTWARE_DIR}
 
 # Samtools
-git clone https://github.com/samtools/samtools.git
+mkdir samtools
 cd samtools
+git clone https://github.com/samtools/samtools.git samtools-v0.1.19
+cd samtools-v0.1.19
 git checkout tags/0.1.19
-cd ${SOFTWARE_DIR}
-make -C samtools -f Makefile 2>&1 >> ${SOFTWARE_DIR}/install.log
+make -f Makefile 2>&1 >> ${SOFTWARE_DIR}/install.log
+ln -s `pwd`/samtools /usr/local/bin/samtools
 cd ${SOFTWARE_DIR}
 
 # Sickle trimming tool
@@ -93,10 +109,18 @@ cd pindel-0.2.5
 cd ${SOFTWARE_DIR}
 
 # Clever-sv
-mkdir clever
+mkdir -p clever
 cd clever
-git clone https://code.google.com/p/clever-sv/
-cd clever-sv
+#git clone https://code.google.com/p/clever-sv/
+#cd clever-sv
+#cmake -DCMAKE_INSTALL_PREFIX=`pwd` . 2>&1 >> ${SOFTWARE_DIR}/install.log
+#make 2>&1 >> ${SOFTWARE_DIR}/install.log
+#make install 2>&1 >> ${SOFTWARE_DIR}/install.log
+
+# the rc version
+wget https://clever-sv.googlecode.com/files/clever-toolkit-v2.0rc3.tar.gz
+tar -zxf clever-toolkit-v2.0rc3.tar.gz
+cd clever-toolkit-v2.0rc3
 cmake -DCMAKE_INSTALL_PREFIX=`pwd` . 2>&1 >> ${SOFTWARE_DIR}/install.log
 make 2>&1 >> ${SOFTWARE_DIR}/install.log
 make install 2>&1 >> ${SOFTWARE_DIR}/install.log
@@ -154,6 +178,8 @@ cd GASVRelease_Oct1_2013
 /bin/bash install >> ${SOFTWARE_DIR}/install.log
 cd ${SOFTWARE_DIR}
 
+# python libraries
+pip install SciPy bitarray
 
 
 # change the rc.local to default
