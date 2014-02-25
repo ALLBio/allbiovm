@@ -4,7 +4,7 @@ Allbio Virtual Machine installer
 This is just a package to streamline the installation of the virtualmachines 
 and/or cluster machines. ( custom installation disk of Ubuntu 12.04.3 LTS )
 
-This package installs the nessecery packages needed for the AllbioTC2 
+This package installs the necessary packages needed for the AllbioTC2 
 pipeline: 
     https://github.com/ALLBio/allbiotc2 
 
@@ -33,7 +33,9 @@ You can use the following to get an encrypted version of your password:
 
 Next to this section, you will find the setup for the first user of the system.
 
-Virtualbox specific notes on creating addtional hard drive
+In this distribution the `root` password is `allbioroot` and the `allbio` user is `allbio`
+
+Notes on creating addtional hard drive (Virtualbox specific)
 ---
 
 In Virtualbox select the virtualmachine that was created using the custom ISO.
@@ -66,8 +68,23 @@ Press `w` and `return` to write the changes to disk.
 
 All what is left is to format the disk
 
-    $ sudo mkfs.ext4 /dev/sdc1
+    $ sudo mkfs.ext4 /dev/sdb1
 
+And give it a label, note that the label should have a `_storage` suffix in 
+order to make it work with the automount procedure (see below):
+
+    $ e2label /dev/sdb1 mygenome_storage
+
+Mounting additional disks in the VM
+---
+
+A automount script is provided in `/data`; called `mountall.sh` which does 
+the drive mounting under the `/data` directory and creates mountpoints for each 
+allbio data diskdrive (download from our website or created as described above)
+
+Just issue the following command:
+
+    allbio@machine:/data $ ./mountall.sh
 
 
 Fork

@@ -47,6 +47,10 @@ dialog --title "Postinstall" --infobox "Done installing, rebooting in a moment..
 # Create the mountpoint /data
 mkdir -p /data
 chmod 777 /data
+cp /root/mountall.sh /data
+chmod 755 /root/mountall.sh
+
+echo benchmark > /etc/hostname
 
 # Run firstboot.sh by rc.local on first boot.
 sed -i 's_exit 0_sh /root/firstboot.sh_' /etc/rc.local >> /root/postinstall.log  2>&1;
