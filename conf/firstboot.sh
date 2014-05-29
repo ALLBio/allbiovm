@@ -105,7 +105,7 @@ cd pindel
 wget -O pindel.tar.gz https://github.com/genome/pindel/archive/v0.2.5.tar.gz
 tar -xzf pindel.tar.gz
 cd pindel-0.2.5
-/bin/sh INSTALL ${SOFTWARE_DIR}/samtools 2>&1 >> ${SOFTWARE_DIR}/install.log
+/bin/sh INSTALL ${SOFTWARE_DIR}/samtools/samtools-v0.1.19 2>&1 >> ${SOFTWARE_DIR}/install.log
 cd ${SOFTWARE_DIR}
 
 # Clever-sv
